@@ -1,0 +1,35 @@
+name: Lab 5A - Run Docker Container Test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-container:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Pull Docker Image from DockerHub
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/hello-devops-app:latest
+
+      - name: Run Container
+        run: docker run -d -p 8080:80 --name test-container ${{ secrets.DOCKER_USERNAME }}/hello-devops-app:latest
+
+      - name: Check Running Containers
+        run: docker ps
+
+      - name: Test Application using Curl
+        run: curl http://localhost:8080
+
+      - name: Stop Container
+        run: docker stop test-container
+
+      - name: Remove Container
+        run: docker rm test-container
